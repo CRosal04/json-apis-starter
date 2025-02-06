@@ -4,7 +4,7 @@ function validateData(e){
 
     // get the word that the user entered in the input, store in variable named word
     // TO DO
-let word = documentById("my-word").value;
+let word = document.getElementById("my-word").value;
     word = word.trim();
 
     if(word.length < 1 || parseInt(word)){
@@ -13,7 +13,7 @@ let word = documentById("my-word").value;
     }else{
         // if the word is valid, let's make our call to the function that works with the API
         // TO DO
-        getWord();
+        getWord(word);
     }
 }
 
@@ -39,11 +39,29 @@ outputSection.classList.remove("hidden");
     
     xhr.addEventListener('readystatechange', function () {
         if (this.readyState === this.DONE) {
-            console.log(this.responseText);
+            //console.log(this.response);
+            let wordInfo = JSON.parse(this.responseText);
+            if(wordInfo.success === false || wordInfo.hasOwnProperty("query")){
+                userWord.innerHTML = `<strong> ${word} is not valid word</strong>`;
+                resetDisplay();
+                display.innerHTML = `<li>Please enter another word and try again</li>`
+            }else if (!wordInfo.definition){
+                userWord.innerHTML = `<strong> ${word}</strong>`;
+                display.innerHTML = "`<li>Please enter another word and try again</li>`";
+            }else{
+                userWord.innerHTML = `<strong> ${word}</strong>`;
+                resentDisplay();
+            
+                for(let def of wordInfo.definition){
+                    display.innerHTML += `<li> ${def.definition} </li>`;
+                }
+                   // clear the user input to make room for another word
+                resetInput();
+            }
         }
     });
-    
-    xhr.open('GET', 'https://wordsapiv1.p.rapidapi.com/words/incredible/definitions');
+    const endpoint = `https://wordsapiv1.p.rapidapi.com/words/${word}/definitions` ;
+    xhr.open('GET',endpoint );
     xhr.setRequestHeader('x-rapidapi-key', 'df89e32c09mshf69a2dfbaefc3ebp1de1c8jsnea0ff3d093d7');
     xhr.setRequestHeader('x-rapidapi-host', 'wordsapiv1.p.rapidapi.com');
     
@@ -83,10 +101,6 @@ outputSection.classList.remove("hidden");
                 // TO DO
                     // each definition is displayed in a list item
                     // TO DO
-                
-
-                // clear the user input to make room for another word
-                resetInput();
            // }
        // }
    // });
